@@ -6,7 +6,7 @@ import {
   View,
   TextInput,
   TouchableOpacity,
-  Animated
+  Animated,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -57,7 +57,7 @@ export default class Search extends Component {
     keyboardAppearance: PropTypes.string,
     fontFamily: PropTypes.string,
     allDataOnEmptySearch: PropTypes.bool,
-    editable: PropTypes.bool
+    editable: PropTypes.bool,
   };
 
   static defaultProps = {
@@ -90,18 +90,18 @@ export default class Search extends Component {
     allDataOnEmptySearch: false,
     backCloseSize: 28,
     fontSize: 20,
-    editable: true
+    editable: true,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       input: '',
-      dimensions: Dimensions.get("window"),
+      dimensions: Dimensions.get('window'),
       show: props.showOnLoad,
       top: new Animated.Value(
         props.showOnLoad ? 0 : INITIAL_TOP + props.heightAdjust
-      )
+      ),
     };
   }
 
@@ -110,7 +110,7 @@ export default class Search extends Component {
   };
 
   setValue = (input) => {
-    return this.setState({input})
+    return this.setState({ input });
   };
 
   show = () => {
@@ -180,7 +180,7 @@ export default class Search extends Component {
     this._onChangeText('');
   };
 
-  _onChangeText = input => {
+  _onChangeText = (input) => {
     const { handleChangeText, handleSearch, handleResults } = this.props;
     this.setState({ input });
     if (handleChangeText) {
@@ -199,12 +199,12 @@ export default class Search extends Component {
     }
   };
 
-  _internalSearch = input => {
+  _internalSearch = (input) => {
     const { data, allDataOnEmptySearch } = this.props;
     if (input === '') {
       return allDataOnEmptySearch ? data : [];
     }
-    return filter(data, item => {
+    return filter(data, (item) => {
       return this._depthFirstSearch(item, input);
     });
   };
@@ -219,17 +219,17 @@ export default class Search extends Component {
         input.toString().toLowerCase()
       );
     }
-    return some(collection, item => this._depthFirstSearch(item, input));
+    return some(collection, (item) => this._depthFirstSearch(item, input));
   };
 
-  _dimHandler = dims => this.setState({dimensions: dims.window});
+  _dimHandler = (dims) => this.setState({ dimensions: dims.window });
 
   componentWillMount() {
-    Dimensions.addEventListener("change", this._dimHandler);
+    Dimensions.addEventListener('change', this._dimHandler);
   }
 
   componentWillUnmount() {
-    Dimensions.removeEventListener("change", this._dimHandler);
+    Dimensions.removeEventListener('change', this._dimHandler);
   }
 
   render = () => {
@@ -260,7 +260,7 @@ export default class Search extends Component {
       closeButtonAccessibilityLabel,
       backCloseSize,
       fontSize,
-      editable
+      editable,
     } = this.props;
     return (
       <Animated.View
@@ -269,21 +269,91 @@ export default class Search extends Component {
           {
             transform: [
               {
-                translateY: this.state.top
-              }
+                translateY: this.state.top,
+              },
             ],
-            shadowOpacity: iOSHideShadow ? 0 : 0.7
-          }
+            shadowOpacity: iOSHideShadow ? 0 : 0.7,
+          },
         ]}>
         {this.state.show && (
-          <View style={[{ backgroundColor }, {width:this.state.dimensions.width}]}>
-            {Platform.OS === 'ios' &&
-              iOSPadding && <View style={{ height: 20, backgroundColor: iOSPaddingBackgroundColor }} />}
+          <View
+            style={[
+              { backgroundColor },
+              { width: this.state.dimensions.width },
+            ]}>
+            {Platform.OS === 'ios' && iOSPadding && (
+              <View
+                style={{
+                  height: 20,
+                  backgroundColor: iOSPaddingBackgroundColor,
+                }}
+              />
+            )}
             <View
               style={[
                 styles.nav,
-                { height: (Platform.OS === 'ios' ? 52 : 62) + heightAdjust }
+                { height: (Platform.OS === 'ios' ? 52 : 62) + heightAdjust },
               ]}>
+              {!hideX && (
+                <TouchableOpacity
+                  accessible={true}
+                  accessibilityComponentType="button"
+                  accessibilityLabel={closeButtonAccessibilityLabel}
+                  onPress={
+                    hideX || this.state.input === '' ? null : this._handleX
+                  }>
+                  {closeButton ? (
+                    <View
+                      style={{ width: backCloseSize, height: backCloseSize }}>
+                      {closeButton}
+                    </View>
+                  ) : (
+                    <Icon
+                      name={'close'}
+                      size={backCloseSize}
+                      style={{
+                        color:
+                          hideX || this.state.input == ''
+                            ? backgroundColor
+                            : iconColor,
+                        padding: heightAdjust / 2 + 10,
+                      }}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
+              <TextInput
+                ref={(ref) => (this.textInput = ref)}
+                onLayout={() => focusOnLayout && this.textInput.focus()}
+                style={[
+                  styles.input,
+                  {
+                    width: this.state.dimensions.width - 120,
+                    fontSize: fontSize,
+                    color: textColor,
+                    fontFamily: fontFamily,
+                    marginLeft: hideBack ? 30 : 0,
+                    marginTop:
+                      Platform.OS === 'ios' ? heightAdjust / 2 + 10 : 0,
+                  },
+                ]}
+                selectionColor={selectionColor}
+                onChangeText={(input) => this._onChangeText(input)}
+                onSubmitEditing={() =>
+                  onSubmitEditing ? onSubmitEditing() : null
+                }
+                onFocus={() => (onFocus ? onFocus() : null)}
+                onBlur={this._handleBlur}
+                placeholder={placeholder}
+                placeholderTextColor={placeholderTextColor}
+                value={this.state.input}
+                underlineColorAndroid="transparent"
+                returnKeyType="search"
+                autoCorrect={autoCorrect}
+                autoCapitalize={autoCapitalize}
+                keyboardAppearance={keyboardAppearance}
+                editable={editable}
+              />
               {!hideBack && (
                 <TouchableOpacity
                   accessible={true}
@@ -301,67 +371,12 @@ export default class Search extends Component {
                       size={backCloseSize}
                       style={{
                         color: iconColor,
-                        padding: heightAdjust / 2 + 10
+                        padding: heightAdjust / 2 + 10,
                       }}
                     />
                   )}
                 </TouchableOpacity>
               )}
-              <TextInput
-                ref={ref => (this.textInput = ref)}
-                onLayout={() => focusOnLayout && this.textInput.focus()}
-                style={[
-                  styles.input,
-                  {
-                    width:this.state.dimensions.width-120,
-                    fontSize: fontSize,
-                    color: textColor,
-                    fontFamily: fontFamily,
-                    marginLeft: hideBack ? 30 : 0,
-                    marginTop: Platform.OS === 'ios' ? heightAdjust / 2 + 10 : 0
-                  }
-                ]}
-                selectionColor={selectionColor}
-                onChangeText={input => this._onChangeText(input)}
-                onSubmitEditing={() =>
-                  onSubmitEditing ? onSubmitEditing() : null}
-                onFocus={() => (onFocus ? onFocus() : null)}
-                onBlur={this._handleBlur}
-                placeholder={placeholder}
-                placeholderTextColor={placeholderTextColor}
-                value={this.state.input}
-                underlineColorAndroid="transparent"
-                returnKeyType="search"
-                autoCorrect={autoCorrect}
-                autoCapitalize={autoCapitalize}
-                keyboardAppearance={keyboardAppearance}
-                editable={editable}
-              />
-              <TouchableOpacity
-                accessible={true}
-                accessibilityComponentType="button"
-                accessibilityLabel={closeButtonAccessibilityLabel}
-                onPress={
-                  hideX || this.state.input === '' ? null : this._handleX
-                }>
-                {closeButton ? (
-                  <View style={{ width: backCloseSize, height: backCloseSize }}>
-                    {closeButton}
-                  </View>
-                ) : (
-                  <Icon
-                    name={'close'}
-                    size={backCloseSize}
-                    style={{
-                      color:
-                        hideX || this.state.input == ''
-                          ? backgroundColor
-                          : iconColor,
-                      padding: heightAdjust / 2 + 10
-                    }}
-                  />
-                )}
-              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -376,26 +391,26 @@ const styles = StyleSheet.create({
     zIndex: 10,
     position: 'absolute',
     elevation: 2,
-    shadowRadius: 5
+    shadowRadius: 5,
   },
   nav: {
     ...Platform.select({
       android: {
         borderBottomColor: 'lightgray',
-        borderBottomWidth: StyleSheet.hairlineWidth
-      }
+        borderBottomWidth: StyleSheet.hairlineWidth,
+      },
     }),
     flex: 1,
     flexBasis: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   input: {
     ...Platform.select({
       ios: { height: 30 },
-      android: { height: 50 }
+      android: { height: 50 },
     }),
-    width: Dimensions.get('window').width - 120
-  }
+    width: Dimensions.get('window').width - 120,
+  },
 });
