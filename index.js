@@ -333,8 +333,7 @@ export default class Search extends Component {
                     color: textColor,
                     fontFamily: fontFamily,
                     marginLeft: hideBack ? 30 : 0,
-                    marginTop:
-                      Platform.OS === 'ios' ? heightAdjust / 2 + 10 : 0,
+                    marginTop: heightAdjust / 2 + 10,
                   },
                 ]}
                 selectionColor={selectionColor}
